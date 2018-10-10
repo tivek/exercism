@@ -1,0 +1,7 @@
+*.swp
+*.bk
+**/target
+tmp
+bin/configlet
+bin/configlet.exe
+rust/*/Cargo.lock
