@@ -1,4 +1,4 @@
-extern crate rna_transcription as dna;
+#extern crate rna_transcription as dna;
 
 #[test]
 fn test_valid_dna_input() {

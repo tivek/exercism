@@ -21,13 +21,11 @@ fn test_count_one_word() {
 }
 
 #[test]
-#[ignore]
 fn test_count_one_of_each() {
     check_word_count("one of each", &[("one", 1), ("of", 1), ("each", 1)]);
 }
 
 #[test]
-#[ignore]
 fn test_count_multiple_occurrences() {
     check_word_count(
         "one fish two fish red fish blue fish",
@@ -36,7 +34,6 @@ fn test_count_multiple_occurrences() {
 }
 
 #[test]
-#[ignore]
 fn test_ignore_punctuation() {
     check_word_count(
         "car : carpet as java : javascript!!&@$%^&",
@@ -51,7 +48,6 @@ fn test_ignore_punctuation() {
 }
 
 #[test]
-#[ignore]
 fn test_include_numbers() {
     check_word_count(
         "testing, 1, 2 testing",
@@ -60,7 +56,6 @@ fn test_include_numbers() {
 }
 
 #[test]
-#[ignore]
 fn test_normalize_case() {
     check_word_count("go Go GO Stop stop", &[("go", 3), ("stop", 2)]);
 }
