@@ -1,0 +1,6 @@
+[package]
+name = "reverse_string"
+version = "1.0.0"
+
+[dependencies]
+unicode-segmentation = "1.2.1"
