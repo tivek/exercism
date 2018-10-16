@@ -1,0 +1,6 @@
+[package]
+name = "protein-translation"
+version = "0.1.0"
+
+[dependencies]
+itertools = "0.7.8"
