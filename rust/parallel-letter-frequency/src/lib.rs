@@ -1,7 +1,7 @@
 extern crate crossbeam;
 
-use std::cmp::{max, min};
 use std::collections::HashMap;
+use std::sync::mpsc;
 
 fn fold_hashmap<K: std::cmp::Eq + std::hash::Hash, V: std::ops::AddAssign + Default>(
     a: HashMap<K, V>,
@@ -14,9 +14,9 @@ fn fold_hashmap<K: std::cmp::Eq + std::hash::Hash, V: std::ops::AddAssign + Defa
     a
 }
 
-fn frequency_single_threaded(input: &[&str]) -> HashMap<char, usize> {
+fn worker(rx: mpsc::Receiver<&str>) -> HashMap<char, usize> {
     let mut out = HashMap::new();
-    for text in input {
+    for text in rx {
         for c in text.to_lowercase().chars().filter(|c| c.is_alphabetic()) {
             *out.entry(c).or_default() += 1;
         }
@@ -26,22 +26,22 @@ fn frequency_single_threaded(input: &[&str]) -> HashMap<char, usize> {
 
 pub fn frequency(input: &[&str], worker_count: usize) -> HashMap<char, usize> {
     crossbeam::scope(|scope| {
-        let mut handlers = Vec::new();
-        handlers.reserve_exact(worker_count);
-        let n = input.len() / worker_count;
-        let mut r = input.len() % worker_count;
-        let mut b = 0;
-        let mut e = n + min(1, r);
-        for _ in 0..worker_count {
-            let data = &input[b..e];
-            handlers.push(scope.spawn(move || frequency_single_threaded(data)));
-            r = max(1, r) - 1;
-            b = e;
-            e += n + min(1, r);
-        }
-        handlers
-            .into_iter()
-            .map(|h| h.join().unwrap())
-            .fold(HashMap::new(), fold_hashmap)
+        {
+            let mut handlers = Vec::new();
+            let mut senders = Vec::new();
+
+            for _ in 0..worker_count {
+                let (tx, rx) = mpsc::channel();
+                handlers.push(scope.spawn(move || worker(rx)));
+                senders.push(tx);
+            }
+
+            for (text, tx) in input.into_iter().zip(senders.into_iter().cycle()) {
+                tx.send(text).unwrap();
+            }
+            handlers
+        }.into_iter()
+        .map(|h| h.join().unwrap())
+        .fold(HashMap::new(), fold_hashmap)
     })
 }
